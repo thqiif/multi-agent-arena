@@ -174,16 +174,36 @@
     .toast.success { border-color: var(--success); }
     .toast.error { border-color: var(--danger); }
     
+    /* Modal actions */
+    .modal-actions { display: flex; gap: 12px; justify-content: flex-end; margin-top: 20px; }
+    
     /* Color picker */
     .color-options { display: flex; gap: 6px; flex-wrap: wrap; }
     .color-option {
-      width: 24px; height: 24px;
+      width: 28px; height: 28px;
       border-radius: 50%;
       cursor: pointer;
       border: 2px solid transparent;
-      transition: border-color 0.2s;
+      transition: border-color 0.2s, transform 0.2s;
     }
-    .color-option.selected { border-color: #fff; }
+    .color-option:hover { transform: scale(1.1); }
+    .color-option.selected { border-color: #fff; box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px currentColor; }
+    
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+      .app { flex-direction: column; }
+      .sidebar { width: 100%; flex-direction: row; flex-wrap: wrap; padding: 12px; border-right: none; border-bottom: 1px solid var(--border); }
+      .sidebar h2 { width: 100%; margin-bottom: 8px; }
+      .persona-list { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; }
+      .persona-item { min-width: 140px; flex-shrink: 0; margin-bottom: 0; }
+      .btn-group { flex-direction: column; gap: 4px; }
+      .chat-header { padding: 12px; }
+      .chat-messages { padding: 12px; }
+      .chat-input { padding: 12px; flex-wrap: wrap; }
+      .chat-input input { width: 100%; order: 1; }
+      .chat-input button { order: 2; width: 100%; margin-top: 8px; }
+      .modal { width: 95%; padding: 16px; }
+    }
   </style>
 </head>
 <body>
@@ -229,7 +249,7 @@
         <textarea id="personaPrompt" placeholder="You are a..."></textarea>
       </div>
       <div class="modal-actions">
-        <button class="btn btn-secondary" onclick="closePersonaModal()">Cancel</button>
+        <button class="btn btn-secondary" onclick="closeModal('personaModal')">Cancel</button>
         <button class="btn btn-danger" id="deletePersonaBtn" onclick="deletePersona()" style="display:none">Delete</button>
         <button class="btn" onclick="savePersona()">Save</button>
       </div>
@@ -268,7 +288,7 @@
         <input type="number" id="threshold" value="0.7" min="0" max="1" step="0.05">
       </div>
       <div class="modal-actions">
-        <button class="btn btn-secondary" onclick="closeSettingsModal()">Close</button>
+        <button class="btn btn-secondary" onclick="closeModal('settingsModal')">Close</button>
         <button class="btn" onclick="saveSettings()">Save</button>
       </div>
     </div>
@@ -358,7 +378,7 @@
       const container = document.getElementById('colorOptions');
       container.innerHTML = COLORS.map(c => `
         <div class="color-option ${state.personas.find(p => p.color === c) ? '' : ''}" 
-             style="background:${c}" onclick="selectColor('${c}')"></div>
+             style="background:${c}" data-color="${c}" onclick="selectColor('${c}')"></div>
       `).join('');
     }
 
@@ -383,7 +403,7 @@
     }
     function updateColorSelection() {
       document.querySelectorAll('.color-option').forEach(el => {
-        el.classList.toggle('selected', el.style.background === selectedColor);
+        el.classList.toggle('selected', el.dataset.color === selectedColor);
       });
     }
 
