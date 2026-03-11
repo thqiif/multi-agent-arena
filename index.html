@@ -245,6 +245,10 @@
         <input type="password" id="openaiKey" placeholder="sk-...">
       </div>
       <div class="form-group">
+        <label>Custom API Base URL (optional)</label>
+        <input type="text" id="customBaseUrl" placeholder="https://api.openai.com/v1">
+      </div>
+      <div class="form-group">
         <label>Anthropic API Key</label>
         <input type="password" id="anthropicKey" placeholder="sk-ant-...">
       </div>
@@ -284,6 +288,7 @@
       settings: {
         openaiKey: '',
         anthropicKey: '',
+        customBaseUrl: '',
         model: 'gpt-4o',
         threshold: 0.7
       },
@@ -433,6 +438,7 @@
     function loadSettingsToModal() {
       document.getElementById('openaiKey').value = state.settings.openaiKey;
       document.getElementById('anthropicKey').value = state.settings.anthropicKey;
+      document.getElementById('customBaseUrl').value = state.settings.customBaseUrl;
       document.getElementById('modelSelect').value = state.settings.model;
       document.getElementById('threshold').value = state.settings.threshold;
     }
@@ -440,6 +446,7 @@
     function saveSettings() {
       state.settings.openaiKey = document.getElementById('openaiKey').value.trim();
       state.settings.anthropicKey = document.getElementById('anthropicKey').value.trim();
+      state.settings.customBaseUrl = document.getElementById('customBaseUrl').value.trim();
       state.settings.model = document.getElementById('modelSelect').value;
       state.settings.threshold = parseFloat(document.getElementById('threshold').value);
       saveState();
@@ -544,10 +551,12 @@ Write a 2-3 sentence response that adds value to the discussion. Be concise and 
     }
 
     async function callLLM(userPrompt) {
-      const { model, openaiKey, anthropicKey } = state.settings;
+      const { model, openaiKey, anthropicKey, customBaseUrl } = state.settings;
+      const baseUrl = customBaseUrl || '';
       
       if (openaiKey && (model.startsWith('gpt'))) {
-        const res = await fetch('https://api.openai.com/v1/chat/completions', {
+        const url = baseUrl ? `${baseUrl}/chat/completions` : 'https://api.openai.com/v1/chat/completions';
+        const res = await fetch(url, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -564,7 +573,8 @@ Write a 2-3 sentence response that adds value to the discussion. Be concise and 
       }
       
       if (anthropicKey && (model.startsWith('claude'))) {
-        const res = await fetch('https://api.anthropic.com/v1/messages', {
+        const url = baseUrl ? `${baseUrl}/messages` : 'https://api.anthropic.com/v1/messages';
+        const res = await fetch(url, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
